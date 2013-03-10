@@ -1,30 +1,38 @@
-$def with (l)
-<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    <h2>List of series</h2>
-    <table id="table">
-    <tdata>
-    $for entry in l:
-      <tr>
-        <td><input type="checkbox" name="$entry" value="$entry"></td>
-        <td>$entry</td>
-        <td><a href="/data/$entry">data</a> <a href="/graph/$entry">graph</a></td>
-      </tr>
-    </tdata>
-    </table>
-    <button id="graphSelected">Graph selected</button>
-    <button id="dataSelected">Show data for selected</button>
+{% extends "base.html" %}
 
-    <script type="text/javascript">
-gs = document.getElementById("graphSelected");
-ds = document.getElementById("dataSelected");
+{% block title %}List
+{% endblock %}
+
+{% block content %}
+<h2>List of series</h2>
+<table id='table'>
+<tdata>
+{% for entry in entries %}
+  <tr>
+    <td><input type='checkbox' name='{{ entry.name }}' value='{{ entry.name }}'></td>
+    <td>{{ entry.name }}</td>
+    <td>
+      <a href='/raw/{{ entry.name }}'>raw data</a>
+      <a href='/graph/{{ entry.name }}'>graph</a>
+      <a href='/s/{{ entry.name }}'>about series</a>
+    </td>
+  </tr>
+{% endfor %}
+</tdata>
+</table>
+<button id='graphSelected'>Graph selected</button>
+<button id='dataSelected'>Show data for selected</button>
+<br/>
+<br/>
+<button id='new'>New series</button>
+
+<script type='text/javascript'>
+gs = document.getElementById('graphSelected');
+ds = document.getElementById('dataSelected');
 
 handler = function(path) {
-  var parent = document.getElementById("table");
-  var children = parent.getElementsByTagName("input");
+  var parent = document.getElementById('table');
+  var children = parent.getElementsByTagName('input');
   var vals = [];
   for (var idx = 0; idx < children.length; idx++) {
     var child = children[idx];
@@ -32,13 +40,19 @@ handler = function(path) {
       vals.push(child.value);
     }
   }
-  var url = path + "/" + vals.join();
+  var url = path + '/' + vals.join();
   window.location.href=url;
 }
 
-gs.onclick = function() { handler("graph"); }
-ds.onclick = function() { handler("data"); }
+gs.onclick = function() { handler('graph'); }
+ds.onclick = function() { handler('raw'); }
 
-    </script>
-  </body>
-</html>
+document.getElementById('new').onclick = function() {
+  var newName = prompt('Enter new series name', '');
+  if (newName !== null && newName !== '') {
+    window.location.href='/newseries?name=' + newName;
+  }
+}
+
+</script>
+{% endblock %}

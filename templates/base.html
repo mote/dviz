@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/style.css" type="text/css" media="all"
+    />
+
+    {% block more_header %}
+    {% endblock %}
+    <title>
+      {%block title %}
+      {% endblock %}
+    </title>
+  </head>
+  <body>
+    <div>
+      {% include "navbar.html" %}
+      <br/>
+    </div>
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>
