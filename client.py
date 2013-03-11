@@ -30,5 +30,8 @@ class DvizClient:
 if __name__ == '__main__':
   dc = DvizClient()
   value = datetime.datetime.now().second
-  print dc.add(series_name='from_client', value=value, user_secret='foo')
+  day = datetime.datetime(year=1979, month=6, day=28, hour=10, minute=42,
+      second=12).strftime('%Y%m%d.%H%M.%S')
+  print dc.add(series_name='from_ts', value=value, user_secret='foo',
+      timestamp=day)
 
