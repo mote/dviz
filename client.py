@@ -1,9 +1,10 @@
 #!/usr/bin/python
 "Client library to add stuff to dviz."
 
+import datetime
+import sys
 import urllib
 import urllib2
-import datetime
 
 
 class DvizClient:
@@ -14,7 +15,8 @@ class DvizClient:
     else:
       self._URL = server
     
-  def add(self, series_name, value, timestamp=None, user_secret=None):
+  def add(self, series_name, value, timestamp=None, user_secret=None,
+          retries=5):
     data = {
       'series': series_name,
       'value': value,
@@ -23,8 +25,15 @@ class DvizClient:
       }
     pdata = urllib.urlencode(data)
     req = urllib2.Request(self._URL, pdata)
-    resp = urllib2.urlopen(req)
-    return resp.read()
+    error = None
+    for i in range(retries):
+      try:
+        resp = urllib2.urlopen(req)
+        return resp.read()
+      except urllib2.HTTPError, e:
+        error = e
+        sys.stderr.write('Error: %s\n', e)
+    return error
   
 
 if __name__ == '__main__':

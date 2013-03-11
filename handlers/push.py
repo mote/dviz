@@ -11,6 +11,7 @@ from handlers import base
 
 # Different possbilities for parseing timestamp strings.
 TIME_FORMATS = [
+    '%Y-%m-%d %H:%M:%S',
     '%Y/%m/%d %H:%M:%S',
     '%Y.%m.%d.%H%M.%S',
     '%Y%m%d.%H%M.%S',
