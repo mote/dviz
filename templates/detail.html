@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block more_header %}
+<script type='text/javascript' src='/static/dygraph-combined.js'></script>
+{% endblock %}
+
+{% block title %}Detail
+{% endblock %}
+
+{% block content %}
+<h2>{{series}}</h2>
+<h3>Last value:{{ latest_val }}, {{ latest_ts}}.</h3>
+
+<div id="graphdiv" style="width:800px; height:600px;"></div>
+<script type="text/javascript">
+range = new Dygraph(document.getElementById("graphdiv"),
+'/raw/{{ timerange }}/{{ series }}',
+  { });
+</script>
+
+<h3>Other sizes</h3>
+<ul>
+  {% for tt in all_timeranges %}
+  <li><a href="/detail/{{ tt }}/{{ series }}">{{tt}}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

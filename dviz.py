@@ -5,6 +5,7 @@ import webapp2
 
 from handlers import addrandom
 from handlers import admin
+from handlers import detail
 from handlers import graph
 from handlers import list
 from handlers import mainpage
@@ -25,6 +26,7 @@ app = webapp2.WSGIApplication([
   ('/newseries', newseries.NewSeries),
   ('/random', addrandom.AddRandom),  # for testing only.
   ('/graph/(.+)', graph.Graph),
+  ('/detail/(.+)/(.+)', detail.Detail),
   ('/s/(.+)', series.Series),
 
   ('/admin', admin.Admin),
