@@ -1,12 +1,21 @@
 <ul id="nav">
-  <li>DVIZ</li>
+  <li><span class="logo"><span class="d">D</span><span class="viz">VIZ</span></span></li>
   {% if navbar.email %}
-    <li><a href="/list">list</a></li>
-    <li><a href="/user">user</a></li>
-    <li><a href="/admin">admin</a></li>
-    <li>{{ navbar.email }} (<a href="{{ navbar.logout_url }}">logout</a>)</li>
+    <div style="display: inline-block; float:left;">
+      <li><a href="/list">list</a></li>
+      <li><a href="/admin">admin</a></li>
+    </div>
+    <div style="display: inline-block; float: right;">
+      <li>{{ navbar.email }} |
+      {{ navbar.nickname }} |
+      <a href="/user">configure</a> |
+      <a href="{{ navbar.logout_url }}">logout</a>
+    </div>
   {% else %}
-    <li> <a href="{{ navbar.login_url }}">log in</a></li>
-    <li><a href="/user">register</a></li>
+    <div style="display: inline-block; float: left;></div>
+    <div style="display: inline-block; float: right;">
+      <li><a href="{{ navbar.login_url }}">log in</a></li>
+      <li><a href="/user">register</a></li>
+    </div>
   {% endif %}
 </ul>
