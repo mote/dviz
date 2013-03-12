@@ -9,7 +9,7 @@ import urllib2
 
 import util
 
-QPS = 0.5
+QPS = 1.0/120
 
 class DvizClient:
   def __init__(self, server='http://localhost:8080'):
