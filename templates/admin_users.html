@@ -19,7 +19,7 @@
     <td>{{ user.email }}</td>
     <td>{{ user.nickname }}</td>
     <td>{{ user.secret }}</td>
-    <td><a href="#">delete</a></td>
+    <td><a href="/api/delete/user/{{user.uid}}">delete</a></td>
   </tr>
   {% endfor %}
   </tdata>

@@ -87,6 +87,11 @@ def get_all_users():
   return User.all().run()
 
 
+def delete_user(user_id):
+  user = get_user_by_id(user_id)
+  db.delete(user)
+
+
 def get_series_by_name(name, user=None):
   # TODO: enforce user ACL.
   try:
@@ -99,11 +104,35 @@ def get_or_add_series(name, user_id=None, secret=None):
   """Gets a series, or adds it if it doesn't exist."""
   user = get_user(user_id, secret)
   try:
-    series = get_series_by_name(name=name, user=user)
+    series = get_series_by_name(name, user)
   except NoSuchSeriesException:
     series = Series(name=name, owner=user)
     series.put()
   return series
+
+
+def delete_series(name, user_id=None, secret=None, delete_at_a_time=200):
+  """Delete a series and all data associated with it."""
+  user = get_user(user_id, secret)
+  try:
+    series = get_series_by_name(name, user)
+  except IndexError:
+    return 0
+
+  # Delete seriesdata first, in case we time out.
+  # Only delete Series after all SeriesData is gone.
+  query = db.GqlQuery('SELECT __key__ from SeriesData where series = :1',
+      series)
+  results = query.fetch(delete_at_a_time)
+  del_count = 0
+  while results:
+    del_count += len(results)
+    db.delete(results)
+    sys.stderr.write('Deleted: %d\n' % del_count)
+    results = query.fetch(delete_at_a_time)
+  # When we get here, we've deleted 
+  db.delete(series)
+  return del_count
 
 
 def get_all_series():
