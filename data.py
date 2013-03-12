@@ -19,6 +19,7 @@ class User(db.Model):
   secret = db.StringProperty()   # secret key for POSTing.
                                  # TODO: salt and hash.
   email = db.StringProperty()                                 
+  nickname = db.StringProperty()
 
 
 class Series(db.Model):
@@ -57,33 +58,38 @@ def get_user_by_secret(secret):
   except IndexError:
     raise UserException('No such user')
 
+def update_user(user_id, secret, nickname):
+  u = get_user_by_id(user_id)
+  u2 = User(uid=user_id, email=u.email, secret=secret, nickname=nickname)
+  u.put() # Does this update?
 
-def add_user(user_id, email_address, secret):
-  sys.stderr.write("add user")
-  sys.stderr.write(user_id)
-  sys.stderr.write(email_address)
-  sys.stderr.write(secret)
-
+def add_user(user_id, email_address, secret, nickname):
   try:
     get_user_by_id(user_id)
     raise UserException('duplicate user')
-  except UserException:
+  except UserException as e:
     pass
 
   # likewise, secret should be unique.
   try:
     get_user_by_secret(secret)
     # TODO(mote): err, do we want to let people know this??
+    # RK says We should generate the secret.
     raise UserException('duplicate secret')
-  except UserException:
+  except UserException as e:
     pass
 
-  u = User(uid=user_id, email=email_address, secret=secret)
+  u = User(uid=user_id, email=email_address, secret=secret, nickname=nickname)
   u.put()
 
 
 def get_all_users():
   return User.all().run()
+
+
+def delete_user(user_id):
+  user = get_user_by_id(user_id)
+  db.delete(user)
 
 
 def get_series_by_name(name, user=None):
@@ -98,11 +104,35 @@ def get_or_add_series(name, user_id=None, secret=None):
   """Gets a series, or adds it if it doesn't exist."""
   user = get_user(user_id, secret)
   try:
-    series = get_series_by_name(name=name, user=user)
+    series = get_series_by_name(name, user)
   except NoSuchSeriesException:
     series = Series(name=name, owner=user)
     series.put()
   return series
+
+
+def delete_series(name, user_id=None, secret=None, delete_at_a_time=200):
+  """Delete a series and all data associated with it."""
+  user = get_user(user_id, secret)
+  try:
+    series = get_series_by_name(name, user)
+  except IndexError:
+    return 0
+
+  # Delete seriesdata first, in case we time out.
+  # Only delete Series after all SeriesData is gone.
+  query = db.GqlQuery('SELECT __key__ from SeriesData where series = :1',
+      series)
+  results = query.fetch(delete_at_a_time)
+  del_count = 0
+  while results:
+    del_count += len(results)
+    db.delete(results)
+    sys.stderr.write('Deleted: %d\n' % del_count)
+    results = query.fetch(delete_at_a_time)
+  # When we get here, we've deleted 
+  db.delete(series)
+  return del_count
 
 
 def get_all_series():
@@ -147,10 +177,8 @@ def get_multiple_series_data(names, since):
 
 
 def add(name, value, user_id='', secret='', timestamp=None):
-  series = get_or_add_series(name, user_id, secret)
-  sys.stderr.write('added series: %s\n' % series.name)
+  series = get_or_add_series(name, user_id=user_id, secret=secret)
   if not series:
-    # Bad user?  fail silently.
     return
   d = SeriesData(series=series, value=value)
   if not timestamp:
