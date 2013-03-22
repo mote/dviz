@@ -4,14 +4,11 @@
 import sys
 import datetime
 
-import data
-import util
-
 from google.appengine.api import users
 
+import data
+import util
 from handlers import base
-
-
 
 
 class Push(base.Base):
@@ -41,12 +38,14 @@ class Push(base.Base):
       status = 'Must specify either value or payload.'
     self.response.out.write(status)
 
-  def single_add(timestamp_str, timems, series, value, user_id,
+  def single_add(self, timestamp_str, timems, series, value, user_id,
       user_secret):
     if not util.has_value(timestamp_str):
       if util.has_value(timems):
         time_seconds = float(timems) / 1000
         timestamp = util.from_seconds(time_seconds)
+      else:
+        timestamp = datetime.datetime.now()
     else:
       timestamp = util.parse_time(timestamp_str)
     data.add(name=series, value=value, timestamp=timestamp, user_id=user_id,
